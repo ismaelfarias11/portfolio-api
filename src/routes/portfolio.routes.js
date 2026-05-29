@@ -160,4 +160,26 @@ router.get('/strengths', async (req, res) => {
     }
 });
 
+router.get('/contact-links', async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT *
+      FROM contact_links
+      ORDER BY position ASC
+    `);
+
+    return res.json({
+      ok: true,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      ok: false,
+      message: 'Error interno',
+    });
+  }
+});
+
 module.exports = router;
