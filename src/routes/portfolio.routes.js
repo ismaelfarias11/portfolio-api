@@ -103,14 +103,61 @@ router.get('/technologies', async (req, res) => {
       ok: true,
       data: result.rows,
     });
-  } catch (error) {
-    console.error('Error obteniendo technologies:', error);
+    } catch (error) {
+    console.error('Error obteniendo hero:', error);
 
     return res.status(500).json({
-      ok: false,
-      message: 'Error interno',
+        ok: false,
+        message: 'Error interno',
+        error: error.message,
     });
-  }
+    }
+    });
+
+router.get('/hero', async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT *
+      FROM hero
+      LIMIT 1
+    `);
+
+    return res.json({
+      ok: true,
+      data: result.rows[0] || null,
+    });
+    } catch (error) {
+    console.error('Error obteniendo hero:', error);
+
+    return res.status(500).json({
+        ok: false,
+        message: 'Error interno',
+        error: error.message,
+    });
+    }
+});
+
+router.get('/strengths', async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT *
+      FROM strengths
+      ORDER BY position ASC
+    `);
+
+    return res.json({
+      ok: true,
+      data: result.rows,
+    });
+    } catch (error) {
+    console.error('Error obteniendo strengths:', error);
+
+    return res.status(500).json({
+        ok: false,
+        message: 'Error interno',
+        error: error.message,
+    });
+    }
 });
 
 module.exports = router;
