@@ -611,4 +611,131 @@ router.delete('/admin/projects/:id', authMiddleware, async (req, res) => {
   }
 });
 
+// =========================
+// Admin: crear contact link
+// =========================
+router.post('/admin/contact-links', authMiddleware, async (req, res) => {
+  const { label, value, href, position } = req.body;
+
+  if (!label || !value || !href) {
+    return res.status(400).json({
+      ok: false,
+      message: 'label, value y href son obligatorios',
+    });
+  }
+
+  try {
+    const result = await db.query(
+      `
+      INSERT INTO contact_links (label, value, href, position)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+      `,
+      [label, value, href, Number(position) || 0]
+    );
+
+    return res.json({
+      ok: true,
+      message: 'Link creado',
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Error creando contact link:', error);
+
+    return res.status(500).json({
+      ok: false,
+      message: 'Error interno',
+    });
+  }
+});
+
+// =========================
+// Admin: actualizar contact link
+// =========================
+router.patch('/admin/contact-links/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+  const { label, value, href, position } = req.body;
+
+  if (!label || !value || !href) {
+    return res.status(400).json({
+      ok: false,
+      message: 'label, value y href son obligatorios',
+    });
+  }
+
+  try {
+    const result = await db.query(
+      `
+      UPDATE contact_links
+      SET
+        label = $1,
+        value = $2,
+        href = $3,
+        position = $4
+      WHERE id = $5
+      RETURNING *
+      `,
+      [label, value, href, Number(position) || 0, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Link no encontrado',
+      });
+    }
+
+    return res.json({
+      ok: true,
+      message: 'Link actualizado',
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Error actualizando contact link:', error);
+
+    return res.status(500).json({
+      ok: false,
+      message: 'Error interno',
+    });
+  }
+});
+
+// =========================
+// Admin: eliminar contact link
+// =========================
+router.delete('/admin/contact-links/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await db.query(
+      `
+      DELETE FROM contact_links
+      WHERE id = $1
+      RETURNING *
+      `,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Link no encontrado',
+      });
+    }
+
+    return res.json({
+      ok: true,
+      message: 'Link eliminado',
+      data: result.rows[0],
+    });
+  } catch (error) {
+    console.error('Error eliminando contact link:', error);
+
+    return res.status(500).json({
+      ok: false,
+      message: 'Error interno',
+    });
+  }
+});
+
 module.exports = router;
